@@ -1,21 +1,11 @@
-terraform {
-  backend "remote" {
-    organization = "dextest"
-
-    workspaces {
-      name = "test"
-    }
-  }
-}
-
 provider "aws" {
   profile = "default"
   region  = var.region
 }
 
 resource "aws_key_pair" "deployer" {
-  key_name   = "aws_humble_pig"
-  public_key = var.testPubKey
+  key_name   = "test"
+  public_key = file("~/.ssh/aws_humble_pig.pub")
 }
 
 resource "aws_instance" "bastion" {
@@ -24,6 +14,20 @@ resource "aws_instance" "bastion" {
   instance_type = "t2.micro"
   subnet_id     = var.bastionsubnetid
   security_groups = var.bastionsecurity_groups
+
+  connection {
+    type        = "ssh"
+    user        = "ec2-user"
+    private_key = file("~/.ssh/aws_humble_pig")
+    host        = self.public_ip
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo amazon-linux-extras enable nginx1.12",
+      "sudo yum -y install nginx"
+    ]
+  }
 }
 resource "aws_instance" "privatews1" {
   key_name      = "aws_humblepig2020"
