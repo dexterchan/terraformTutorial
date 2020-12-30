@@ -35,3 +35,5 @@ variable "sku" {
     eastus  = "18.04-LTS"
   }
 }
+
+variable "testPubKey" {}

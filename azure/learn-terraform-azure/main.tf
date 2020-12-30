@@ -49,7 +49,12 @@ resource "azurerm_virtual_machine" "vm" {
   }
 
   os_profile_linux_config {
-    disable_password_authentication = false
+    disable_password_authentication = true
+
+    ssh_keys {
+      key_data = var.testPubKey
+      path     = "/home/${var.admin_username}/.ssh/authorized_keys"
+    }
   }
 }
 
