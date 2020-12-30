@@ -64,7 +64,11 @@ resource_group_name = light-eagle-rg
 To configure kubetcl run the following command:
 
 ```shell
-$ az aks get-credentials --resource-group light-eagle-rg --name light-eagle-aks;
+
+export resourcegroup=$(terraform output resource_group_name | jq -r .)
+export k8scluster=$(terraform output kubernetes_cluster_name | jq -r .)
+
+az aks get-credentials --resource-group $resourcegroup --name $k8scluster
 ```
 
 The
@@ -76,6 +80,7 @@ You can view these outputs again by running:
 
 ```shell
 $ terraform output
+
 ```
 
 ## Configure Kubernetes Dashboard
@@ -84,6 +89,10 @@ To use the Kubernetes dashboard, we need to create a `ClusterRoleBinding`. This
 gives the `cluster-admin` permission to access the `kubernetes-dashboard`.
 
 ```shell
+kubectl create serviceaccount dashboard-admin-sa
+kubectl create clusterrolebinding dashboard-admin-sa --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin-sa
+
+
 $ kubectl create clusterrolebinding kubernetes-dashboard --clusterrole=cluster-admin --serviceaccount=kube-system:kubernetes-dashboard  --user=clusterUser
 clusterrolebinding.rbac.authorization.k8s.io/kubernetes-dashboard created
 ```
@@ -95,6 +104,12 @@ $ az aks browse --resource-group light-eagle-rg --name light-eagle-aks
 Merged "light-eagle-aks" as current context in /var/folders/s6/m22_k3p11z104k2vx1jkqr2c0000gp/T/tmpcrh3pjs_
 Proxy running on http://127.0.0.1:8001/
 Press CTRL+C to close the tunnel...
+
+Get the token
+export SECRET_KEY=$(kubectl get secrets | grep dashboard | cut -f1 -d " ")
+(prefered): kubectl describe secret $SECRET_KEY 
+ (decoded token if apply directly, need to add line break per 64 characters): kubectl get secret $SECRET_KEY -o json | jq -r ".data.token"
+
 ```
 
  You should be able to access the Kubernetes dashboard at [http://127.0.0.1:8001/](http://127.0.0.1:8001/).
