@@ -5,7 +5,7 @@ Terraform configuration files to provision an AKS cluster on
 Azure.
 
 After installing the Azure CLI and logging in. Create an Active Directory service
-principal account.
+principal account. By default, service account only live for 1 year
 
 ```shell
 $ az ad sp create-for-rbac --skip-assignment
