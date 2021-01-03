@@ -92,6 +92,7 @@ gives the `cluster-admin` permission to access the `kubernetes-dashboard`.
 kubectl create serviceaccount dashboard-admin-sa
 kubectl create clusterrolebinding dashboard-admin-sa --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin-sa
 
+kubectl apply -f kubernetes-dashboard-admin.rbac.yaml
 
 $ kubectl create clusterrolebinding kubernetes-dashboard --clusterrole=cluster-admin --serviceaccount=kube-system:kubernetes-dashboard  --user=clusterUser
 clusterrolebinding.rbac.authorization.k8s.io/kubernetes-dashboard created
@@ -100,14 +101,14 @@ clusterrolebinding.rbac.authorization.k8s.io/kubernetes-dashboard created
 Finally, to access the Kubernetes dashboard, run the following command:
 
 ```shell
-$ az aks browse --resource-group light-eagle-rg --name light-eagle-aks
+$ az aks browse --resource-group ${resourcegroup} --name ${k8scluster}
 Merged "light-eagle-aks" as current context in /var/folders/s6/m22_k3p11z104k2vx1jkqr2c0000gp/T/tmpcrh3pjs_
 Proxy running on http://127.0.0.1:8001/
 Press CTRL+C to close the tunnel...
 
 Get the token
-export SECRET_KEY=$(kubectl get secrets | grep dashboard | cut -f1 -d " ")
-(prefered): kubectl describe secret $SECRET_KEY 
+export SECRET_KEY=$(kubectl get secrets -n kube-system| grep admin | cut -f1 -d " ")
+(prefered): kubectl describe secret $SECRET_KEY -n kube-system
  (decoded token if apply directly, need to add line break per 64 characters): kubectl get secret $SECRET_KEY -o json | jq -r ".data.token"
 
 ```
